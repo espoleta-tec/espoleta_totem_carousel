@@ -5,7 +5,7 @@ export type StrapiResponseData<T = any> = {
 }
 
 export type StrapiResponse<T = any> = {
-    data: StrapiResponseData<T>,
+    data: StrapiResponseData<T> | StrapiResponseData<T>[],
     "meta": Record<string, any>
 }
 

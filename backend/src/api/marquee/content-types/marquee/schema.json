@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "marquees",
+  "info": {
+    "singularName": "marquee",
+    "pluralName": "marquees",
+    "displayName": "marquee",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "text": {
+      "type": "text"
+    }
+  }
+}
