@@ -1,0 +1,20 @@
+version: '2.6'
+
+services:
+  backend:
+    container_name: page_cms
+    build: ./backend
+    networks:
+      - default
+    env_file:
+      - ./backend/.env
+
+
+
+networks:
+  default:
+    name: app-network
+
+volumes:
+  strapi_db:
+  uploads:

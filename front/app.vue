@@ -1,11 +1,12 @@
+<!--suppress ALL -->
 <template>
   <div class="h-[100vh] w-[100vw] bg-slate-600 relative">
-    <div class="absolute w-full bottom-0 py-8 z-[100]"
-         style="backdrop-filter: blur(8px) brightness(0.5)">
-      <marquee class="text-white" behavior="" direction="">hello</marquee>
+    <div class="absolute w-full bottom-0 py-8 z-[100] holder text-white"
+         style="backdrop-filter: blur(16px) brightness(0.5)">
+      <div class="news" v-html="marquees">
+      </div>
     </div>
     <swiper
-        ref="sw"
         :modules="[EffectFade, Autoplay]"
         effect="fade"
         @swiper="onSwiper"
@@ -18,7 +19,7 @@
         class="h-full w-full bg-slate-50 swiper"
     >
       <swiper-slide class="bg-green-100" v-for="i in images" :key="i">
-        <img class="w-full" :src="`http://localhost:1337${i}`" alt="">
+        <img class="w-full h-full" :src="`http://localhost:1337${i}`" alt="">
       </swiper-slide>
     </swiper>
   </div>
@@ -33,7 +34,7 @@ import {
   StrapiImage,
   StrapiResponse,
   StrapiResponseData
-} from "~/types/strapi-response";
+} from "~/types/strapi-response"
 
 
 export default {
@@ -41,24 +42,20 @@ export default {
     Swiper, SwiperSlide
   },
   async setup() {
-    const {
-      data: pictureData,
-    } = await useFetch<StrapiResponse>('http://localhost:1337/api/picture', {
-      params: {
-        populate: ['images']
-      }
-    })
+    const [{data: picture,}, {data: marquee, error}] = await Promise.all([
+      useFetch<StrapiResponse>('http://localhost:1337/api/picture?populate=images'),
+      useFetch<StrapiResponse>('http://localhost:1337/api/marquees')
+    ])
+
 
     let images: string[] = []
 
-    const strapiImages = (pictureData.value!.data as StrapiResponseData).attributes.images.data as StrapiImage[]
+    const strapiImages = (picture.value!.data as StrapiResponseData).attributes.images.data as StrapiImage[]
     images = strapiImages.map(i => i.attributes.url)
+    const marquees = (marquee.value?.data as StrapiResponseData[])?.map(m => `<span>
+${m.attributes.text}
+    </span>`).join(`<div class="px-4 text-center"><div class="w-[1px] h-[24px] bg-white"></div></div>`)
 
-    // const {
-    //   data: marqueeData,
-    // } = await useFetch<StrapiResponse>('localhost:1337/api/marquees')
-
-    // const marquees = (marqueeData.value!.data as StrapiResponseData[]).map(m => m.attributes.text).join('\t|\t')
 
     const onSwiper = (swiper: ST) => {
     }
@@ -71,6 +68,7 @@ export default {
       Autoplay,
       images,
       strapiImages,
+      marquees,
     }
   }
 }
@@ -79,5 +77,26 @@ export default {
 <style lang="css">
 body {
   @apply bg-black
+}
+
+.holder {
+  overflow: hidden;
+}
+
+.news {
+  animation: slide 20s linear infinite;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+@keyframes slide {
+  0% {
+    transform: translatex(100%)
+  }
+
+  100% {
+    transform: translatex(-100%)
+  }
 }
 </style>
