@@ -2,7 +2,7 @@ version: '2.6'
 
 services:
   backend:
-    container_name: page_cms
+    container_name: totem_backend
     build: ./backend
     networks:
       - default

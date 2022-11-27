@@ -20,7 +20,8 @@
         class="h-full w-full bg-slate-50 swiper"
     >
       <swiper-slide class="bg-green-100" v-for="i in images" :key="i">
-        <img style="object-fit: cover" class="w-full h-full" :src="`${apiUrl}${i}`" alt=""/>
+        <img style="object-fit: cover" class="w-full h-full"
+             :src="`${apiUrl}${i}`" alt=""/>
       </swiper-slide>
     </swiper>
   </div>
@@ -37,6 +38,7 @@ import {
   StrapiResponseData
 } from "~/types/strapi-response"
 import {useRuntimeConfig} from "#app";
+import {useHead} from "#imports";
 
 
 export default {
@@ -48,7 +50,15 @@ export default {
 
     const apiBase = useRuntimeConfig().public.apiBase
 
-    console.log(apiBase)
+    useHead({
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/favicon.png'
+        }
+      ]
+    })
 
     const [{data: picture, error: perror}, {
       data: marquee,
