@@ -3,8 +3,9 @@
   <div class="h-[100vh] w-[100vw] bg-slate-600 relative">
     <div class="absolute w-full bottom-0 py-8 z-[100] holder text-white"
          style="backdrop-filter: blur(16px) brightness(0.5)">
-      <div class="news" v-html="marquees">
-      </div>
+      <marquee
+          v-html="marquees">
+      </marquee>
     </div>
     <swiper
         :modules="[EffectFade, Autoplay]"
@@ -19,7 +20,7 @@
         class="h-full w-full bg-slate-50 swiper"
     >
       <swiper-slide class="bg-green-100" v-for="i in images" :key="i">
-        <img class="w-full h-full" :src="`http://localhost:1337${i}`" alt="">
+        <img style="object-fit: cover" class="w-full h-full" :src="`${apiUrl}${i}`" alt=""/>
       </swiper-slide>
     </swiper>
   </div>
@@ -35,6 +36,7 @@ import {
   StrapiResponse,
   StrapiResponseData
 } from "~/types/strapi-response"
+import {useRuntimeConfig} from "#app";
 
 
 export default {
@@ -42,9 +44,18 @@ export default {
     Swiper, SwiperSlide
   },
   async setup() {
-    const [{data: picture,}, {data: marquee, error}] = await Promise.all([
-      useFetch<StrapiResponse>('http://localhost:1337/api/picture?populate=images'),
-      useFetch<StrapiResponse>('http://localhost:1337/api/marquees')
+    const news = ref<HTMLElement | null>(null)
+
+    const apiBase = useRuntimeConfig().public.apiBase
+
+    console.log(apiBase)
+
+    const [{data: picture, error: perror}, {
+      data: marquee,
+      error: merror
+    }] = await Promise.all([
+      useFetch<StrapiResponse>(`${apiBase}/api/picture?populate=images`),
+      useFetch<StrapiResponse>(`${apiBase}/api/marquees`)
     ])
 
 
@@ -52,10 +63,19 @@ export default {
 
     const strapiImages = (picture.value!.data as StrapiResponseData).attributes.images.data as StrapiImage[]
     images = strapiImages.map(i => i.attributes.url)
-    const marquees = (marquee.value?.data as StrapiResponseData[])?.map(m => `<span>
+    let marquees = (marquee.value?.data as StrapiResponseData[])?.map(m => `<span>
 ${m.attributes.text}
     </span>`).join(`<div class="px-4 text-center"><div class="w-[1px] h-[24px] bg-white"></div></div>`)
 
+    marquees = `<div class="flex flex-row items-center">
+${marquees}
+</div>`
+
+    const newsCls = computed(() => {
+      if (!news.value) return null
+
+      news.value.clientLeft
+    })
 
     const onSwiper = (swiper: ST) => {
     }
@@ -69,6 +89,8 @@ ${m.attributes.text}
       images,
       strapiImages,
       marquees,
+      news,
+      apiUrl: apiBase
     }
   }
 }
@@ -85,14 +107,11 @@ body {
 
 .news {
   animation: slide 20s linear infinite;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
 }
 
 @keyframes slide {
   0% {
-    transform: translatex(100%)
+    transform: translatex(200%)
   }
 
   100% {
